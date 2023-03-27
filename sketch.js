@@ -1,159 +1,135 @@
-var bg,bgImg;
-var player, shooterImg, shooter_shooting;
-var zombie, zombieImg;
-
-var heart1, heart2, heart3;
-var heart1Img, heart2Img, heart3Img;
-
-var zombieGroup;
-var life = 3;
-
-
+var bg, bgImg
+var bottomGround
+var topGround
+var balloon, balloonImg
+var obstacleTop, obsTop1, obsTop2
+var obstacleBottom, obsBottom1, obsBottom2, obsBottom3
 
 function preload(){
-  
-  heart1Img = loadImage("assets/heart_1.png")
-  heart2Img = loadImage("assets/heart_2.png")
-  heart3Img = loadImage("assets/heart_3.png")
+  bgImg = loadImage("assets/bg.png")
+  bgImg2 = loadImage("assets/bgImg2.jpg")
+balloonImg = loadAnimation("assets/balloon1.png","assets/balloon2.png","assets/balloon3.png")
 
-  shooterImg = loadImage("assets/shooter_2.png")
-  shooter_shooting = loadImage("assets/shooter_3.png")
+obsTop1 = loadImage("assets/obsTop1.png")
+obsTop2 = loadImage("assets/obsTop2.png")
 
-  zombieImg = loadImage("assets/zombie.png")
-
-  bgImg = loadImage("assets/bg.jpeg")
+obsBottom1 = loadImage("assets/obsBottom1.png")
+obsBottom2 = loadImage("assets/obsBottom2.png")
+obsBottom3 = loadImage("assets/obsBottom3.png")
 
 }
 
-function setup() {
+function setup(){
 
-  
-  createCanvas(windowWidth,windowHeight);
-
-  //adding the background image
-  bg = createSprite(displayWidth/2-20,displayHeight/2-40,20,20)
-bg.addImage(bgImg)
-bg.scale = 1.1
-  
-
-//creating the player sprite
-player = createSprite(displayWidth-1150, displayHeight-300, 50, 50);
- player.addImage(shooterImg)
-   player.scale = 0.3
-   player.debug = true
-   player.setCollider("rectangle",0,0,300,300)
+  createCanvas(400,400)
+//background image
+bg = createSprite(165,485,1,1);
+getBackgroundImg();
 
 
-   //creating sprites to depict lives remaining
-   heart1 = createSprite(displayWidth-150,40,20,20)
-   heart1.visible = false
-    heart1.addImage("heart1",heart1Img)
-    heart1.scale = 0.4
+//creating top and bottom grounds
+bottomGround = createSprite(200,390,800,20);
+bottomGround.visible = false;
 
-    heart2 = createSprite(displayWidth-100,40,20,20)
-    heart2.visible = false
-    heart2.addImage("heart2",heart2Img)
-    heart2.scale = 0.4
+topGround = createSprite(200,10,800,20);
+topGround.visible = false;
+      
+//creating balloon     
+balloon = createSprite(100,200,20,50);
+balloon.addAnimation("balloon",balloonImg);
+balloon.scale = 0.2;
 
-    heart3 = createSprite(displayWidth-150,40,20,20)
-    heart3.addImage("heart3",heart3Img)
-    heart3.scale = 0.4
-   
 
-    //creating group for zombies    
-    zombieGroup = new Group();
+
 }
 
 function draw() {
-  background(0); 
-
-
-    //displaying the appropriate image according to lives reamining
-    if(life===3){
-      heart3.visible = true
-      heart1.visible = false
-      heart2.visible = false
-    }
-    if(life===2){
-      heart2.visible = true
-      heart1.visible = false
-      heart3.visible = false
-    }
-    if(life===1){
-      heart1.visible = true
-      heart3.visible = false
-      heart2.visible = false
-    }
   
-    //go to gameState "lost" when 0 lives are remainsing
-    if(life===0){
-      heart1.visible = false
-      heart3.visible = false
-      heart2.visible = false
-      player.destroy();
-    }
-  
-  //moving the player up and down and making the game mobile compatible using touches
-if(keyDown("UP_ARROW")||touches.length>0){
-  player.y = player.y-30
-}
-if(keyDown("DOWN_ARROW")||touches.length>0){
- player.y = player.y+30
-}
+  background("black");
+        
+          //making the hot air balloon jump
+          if(keyDown("space")) {
+            balloon.velocityY = -6 ;
+            
+          }
 
+          //adding gravity
+           balloon.velocityY = balloon.velocityY + 2;
 
-//release bullets and change the image of shooter to shooting position when space is pressed
-if(keyWentDown("space")){
-  
-  player.addImage(shooter_shooting)
-  
- 
-}
-
-//player goes back to original standing image once we stop pressing the space bar
-else if(keyWentUp("space")){
-  player.addImage(shooterImg)
-}
-
-
-//destroy zombie when player touches it
-if(zombieGroup.isTouching(player)){
- 
-
- for(var i=0;i<zombieGroup.length;i++){     
-      
-  if(zombieGroup[i].isTouching(player)){
-       zombieGroup[i].destroy()
-       life=life-1
-
-       } 
- }
-}
-
-//calling the function to spawn zombies
-enemy();
-
-drawSprites();
-text("Lives = " + life,displayWidth-200,displayHeight/2-280)
-}
-
-
-
-//creating function to spawn zombies
-function enemy(){
-  if(frameCount%50===0){
-
-    //giving random x and y positions for zombie to appear
-    zombie = createSprite(random(500,1100),random(100,500),40,40)
-
-    zombie.addImage(zombieImg)
-    zombie.scale = 0.15
-    zombie.velocityX = -3
-    zombie.debug= true
-    zombie.setCollider("rectangle",0,0,400,400)
+           
+          Bar();
    
-    zombie.lifetime = 400
-   zombieGroup.add(zombie)
+        drawSprites();
+       
+        //spawning top obstacles
+      spawnObstaclesTop();
+
+      
+}
+
+
+function spawnObstaclesTop() 
+{
+      if(World.frameCount % 60 === 0) {
+        obstacleTop = createSprite(400,50,40,50);
+    
+    //obstacleTop.addImage(obsTop1);
+    
+    obstacleTop.scale = 0.1;
+    obstacleTop.velocityX = -4;
+
+    //random y positions for top obstacles
+    obstacleTop.y = Math.round(random(10,100));
+
+    //generate random top obstacles
+    var rand = Math.round(random(1,2));
+    switch(rand) {
+      case 1: obstacleTop.addImage(obsTop1);
+              break;
+      case 2: obstacleTop.addImage(obsTop2);
+              break;
+      default: break;
+    }
+
+     //assign lifetime to the variable
+   obstacleTop.lifetime = 100;
+    
+   balloon.depth = balloon.depth + 1;
+   
+      }
+}
+
+ function Bar() 
+ {
+         if(World.frameCount % 60 === 0)
+         {
+           var bar = createSprite(400,200,10,800);
+          bar.velocityX = -6
+          bar.depth = balloon.depth;
+          bar.lifetime = 70;
+          bar.visible = true;
+         }
+        }
+
+
+async function getBackgroundImg(){
+  var response = await fetch("http://worldtimeapi.org/api/timezone/Asia/Kolkata");
+  var responseJSON = await response.json();
+
+  var datetime = responseJSON.datetime;
+  var hour = datetime.slice(11,13);
+  
+  if(hour>=06 && hour<=16){
+    
+    bg.addImage(bgImg);
+    bg.scale = 1.3
+  }
+  else{
+    
+    bg.addImage(bgImg2);
+    bg.scale = 1.5
+    bg.x=200
+    bg.y=200
   }
 
 }
